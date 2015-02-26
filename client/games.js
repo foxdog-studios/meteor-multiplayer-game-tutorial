@@ -17,7 +17,6 @@ function preload() {
 
 }
 
-var player;
 var players = [];
 var playerSprites = {};
 var cursors;
