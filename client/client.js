@@ -17,8 +17,8 @@ function createMyself() {
 
             type: 'player',
             isMovable: true,
-            x: 0,
-            y: 0,
+            x: 128,
+            y: 128,
             xDirection: 0,
             yDirection: 0,
             speed: 200,
@@ -64,6 +64,18 @@ function updateMyself(me) {
         shootBullet(me);
     }
 
+    // Reset
+    if (game.input.keyboard.isDown(Phaser.Keyboard.R))
+    {
+        Meteor.call('reset');
+    }
+
+    // Create a monster
+    if (game.input.keyboard.isDown(Phaser.Keyboard.M))
+    {
+        createMonster(me);
+    }
+
     Entities.update(MY_ID, {
 
         $set: {
@@ -90,7 +102,7 @@ function shootBullet(entity) {
         y: entity.y + vectorY * 16,
         xDirection: vectorX,
         yDirection: vectorY,
-        speed: 400,
+        speed: 800,
         angle: entity.angle,
         isMovable: true,
         isAnimatable: true,
@@ -99,6 +111,26 @@ function shootBullet(entity) {
     });
 }
 
+// =============================================================================
+// = Monster                                                                   =
+// =============================================================================
+
+function createMonster(entity) {
+    Entities.insert({
+
+        type: 'monster',
+        x: entity.x,
+        y: entity.y,
+        xDirection: 0,
+        yDirection: 0,
+        speed: 100,
+        angle: entity.angle,
+        isMovable: true,
+        isAnimatable: true,
+        animation: 'idle'
+
+    });
+}
 
 // =============================================================================
 // = Game                                                                      =
@@ -128,6 +160,7 @@ function preload() {
 
     game.load.spritesheet('bullet', cacheBust('bullet.png'), 8, 8);
     game.load.spritesheet('player', cacheBust('player.png'), 16, 16);
+    game.load.spritesheet('monster', cacheBust('monster.png'), 16, 16);
 
 }
 
@@ -229,6 +262,9 @@ function onEntityAdded(newEntity) {
             sprite.animations.add('walk', [0, 1]);
             break;
         case 'bullet':
+            sprite.animations.add('idle', [0]);
+            break;
+        case 'monster':
             sprite.animations.add('idle', [0]);
             break;
     }

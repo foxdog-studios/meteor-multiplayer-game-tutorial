@@ -140,7 +140,7 @@ function detectAndHandleCollisions(entities) {
             var dy = e2.newVersion.y - e1.newVersion.y;
             var distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < 100)
+            if (distance < 8)
             {
                 handleCollision(e1, e2);
             }
@@ -152,7 +152,7 @@ function detectAndHandleCollisions(entities) {
 
 function handleCollision(entity1, entity2) {
 
-    entity2.newVersion.x -= 100;
+    entity2.newVersion.x -= 10;
 
 }
 
