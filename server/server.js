@@ -1,6 +1,6 @@
 var lastUpdated;
 
-var framesPerSecond = 15;
+var framesPerSecond = 30;
 
 var millisecondsPerFrame = 1000 / framesPerSecond;
 
@@ -46,6 +46,13 @@ function update() {
     detectAndHandleCollisions(entities);
 
     entities.forEach(function (entity) {
+
+        if (entity.newVersion.needsRemoving)
+        {
+            console.log('removing');
+            Entities.remove(entity.newVersion._id);
+            return;
+        }
 
         var diff = difference(entity.newVersion, entity.oldVersion);
 
@@ -114,6 +121,16 @@ function updateMovable(delta, newEntity, oldEntity) {
     var y = newEntity.y + yVelocity;
     newEntity.x = clamp(0, x, WORLD_WIDTH);
     newEntity.y = clamp(0, y, WORLD_HEIGHT);
+
+    if (newEntity.type === 'bullet') {
+        if (newEntity.x === 0
+                || newEntity.x === WORLD_WIDTH
+                || newEntity.y === 0
+                || newEntity.y === WORLD_HEIGHT )
+        {
+            newEntity.needsRemoving = true;
+        }
+    }
 
     if (xVelocity !== 0 || yVelocity !== 0)
     {
@@ -210,6 +227,19 @@ function detectAndHandleCollisions(entities) {
 
 
 function handleCollision(entity1, entity2) {
+
+    if (entity1.newVersion.type == 'bullet')
+    {
+        entity1.newVersion.needsRemoving = true;
+        return;
+    }
+    if (entity2.newVersion.type == 'bullet')
+    {
+        entity2.newVersion.needsRemoving = true;
+
+        return;
+    }
+
 
     var shiftX;
     var shiftY;
