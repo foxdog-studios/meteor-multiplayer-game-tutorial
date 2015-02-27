@@ -8,6 +8,8 @@ UP = -1;
 WORLD_WIDTH = 1920;
 WORLD_HEIGHT = 1280;
 
+TILE_SIZE_PX = 16;
+
 
 Entities = new Mongo.Collection('entities', null);
 

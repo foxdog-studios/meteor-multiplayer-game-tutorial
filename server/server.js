@@ -30,12 +30,14 @@ function update() {
 
     var deltaSeconds = delta / 1000;
 
-    var entities = Entities.find().map(function (oldVersion) {
+    var oldEntities = Entities.find().fetch();
+
+    var entities = _.map(oldEntities, function (oldVersion) {
 
         return {
 
             oldVersion: oldVersion,
-            newVersion: updateEntity(deltaSeconds, oldVersion)
+            newVersion: updateEntity(deltaSeconds, oldVersion, oldEntities)
 
         };
 
@@ -57,13 +59,12 @@ function update() {
 
     // = Schedule ==========================================================
 
-    console.log(millisecondsPerFrame - Date.now() + start);
     Meteor.setTimeout(update, millisecondsPerFrame - Date.now() + start);
 
 }
 
 
-function updateEntity(delta, oldEntity) {
+function updateEntity(delta, oldEntity, oldEntities) {
 
     var newEntity = _.clone(oldEntity);
 
@@ -75,6 +76,11 @@ function updateEntity(delta, oldEntity) {
     if (oldEntity.isAnimatable)
     {
         updateAnimatable(delta, newEntity, oldEntity);
+    }
+
+    if (oldEntity.isAi)
+    {
+        updateAi(delta, newEntity, oldEntity, oldEntities);
     }
 
     return newEntity;
@@ -126,6 +132,34 @@ function updateAnimatable(delta, newEntity, oldEntity) {
 }
 
 
+function updateAi(delta, newEntity, oldEntity, oldEntities) {
+
+    if (newEntity.type !== 'monster') {
+        return;
+    }
+
+    oldEntities.forEach(function(entity) {
+        if (entity.type === 'player')
+        {
+            var dX = entity.x - newEntity.x;
+            var dY = entity.y - newEntity.y;
+            var distance = Math.sqrt(dX * dX + dY * dY);
+            if (distance === 0) {
+                return;
+            }
+            var normalisedDx = dX / distance;
+            var normalisedDy = dY / distance;
+            var temp = Math.atan2(normalisedDy, normalisedDx);
+            newEntity.angle = (temp - Math.atan2(1, 0)) * 180 / Math.PI;
+            newEntity.x += dX / distance * 2;
+            newEntity.y += dY / distance * 2;
+            return;
+        }
+    });
+
+}
+
+
 // =============================================================================
 // = Collision detection                                                       =
 // =============================================================================
@@ -150,7 +184,7 @@ function detectAndHandleCollisions(entities) {
             var dy = e2.newVersion.y - e1.newVersion.y;
             var distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < 8)
+            if (distance < TILE_SIZE_PX)
             {
                 handleCollision(e1, e2);
             }
@@ -162,7 +196,35 @@ function detectAndHandleCollisions(entities) {
 
 function handleCollision(entity1, entity2) {
 
-    entity2.newVersion.x -= 10;
+    var shiftX;
+    var shiftY;
+    diffX = entity2.newVersion.x - entity1.newVersion.x;
+    if (diffX < 0) {
+        shiftX = -1;
+    }
+    else if (diffX > 0)
+    {
+        shiftX = 1;
+    }
+    else
+    {
+        shiftX = Math.random() < 0.5 ? 1 : -1;
+    }
+
+    diffY = entity2.newVersion.y - entity1.newVersion.y;
+    if (diffY < 0) {
+        shiftY = -1;
+    }
+    else if (diffY > 0)
+    {
+        shiftY = 1;
+    }
+    else
+    {
+        shiftY = Math.random() < 0.5 ? 1 : -1;
+    }
+    entity2.newVersion.x += shiftX * TILE_SIZE_PX / 4;
+    entity2.newVersion.y -= shiftY * TILE_SIZE_PX / 4;
 
 }
 
