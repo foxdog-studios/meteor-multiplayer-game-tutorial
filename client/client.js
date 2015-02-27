@@ -20,7 +20,11 @@ function createMyself() {
 
             x: 0,
 
-            y: 0
+            y: 0,
+
+            angle: 0,
+
+            animation: 'idle'
 
         }
 
@@ -65,31 +69,37 @@ function updateMyself(me) {
         yInc /= magnitudeOfMovement;
     }
 
-    Players.update(me._id, {
-
-        $inc: {
-
-            x: xInc * speed,
-
-            y: yInc * speed
-
-        }
-
-    });
+    var update = {};
 
     if (mySprite)
     {
+        var $set = {};
         if (yInc != 0 || xInc != 0)
         {
             angleInRadians = (Math.atan2(yInc, xInc) - Math.atan2(1, 0));
-            mySprite.angle = angleInRadians * 180 / Math.PI;
-            mySprite.animations.play('walk', speed, true);
+            playerAngleDegrees = angleInRadians * 180 / Math.PI;
+            $set.angle = playerAngleDegrees
+            animation = 'walk';
         }
         else
         {
-            mySprite.animations.play('idle', 1, true);
+            animation = 'idle';
         }
+        $set.animation = animation;
     }
+
+    update.$inc = {
+
+        x: xInc * speed,
+
+        y: yInc * speed
+
+    }
+
+    update.$set = $set;
+
+    Players.update(me._id, update);
+
 }
 
 
@@ -162,7 +172,6 @@ function updatePlayer(player) {
 
         sprite.animations.add('idle', [1]);
         sprite.animations.add('walk');
-        sprite.animations.play('idle', 1, true);
 
         sprite.anchor.setTo(0.5, 0.5);
 
@@ -183,6 +192,10 @@ function updatePlayerSprite(player, sprite) {
     sprite.x = player.x;
 
     sprite.y = player.y;
+
+    sprite.angle = player.angle;
+
+    sprite.animations.play(player.animation, 4, true);
 
 }
 
