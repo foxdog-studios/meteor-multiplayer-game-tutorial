@@ -16,17 +16,32 @@ Meteor.startup(function () {
 
 function update() {
 
+    // = Update timestamps =================================================
+
     var now = Date.now() / 1000;
 
     var delta = now - lastUpdated;
 
-    Entities.find().forEach(function (entity) {
+    lastUpdated = now;
 
-        updateEntity(delta, entity)
+
+    // = Update Entities ===================================================
+
+    function updateEntityWithDelta(oldEntity) {
+
+        return updateEntity(delta, oldEntity);
+
+    }
+
+    var newEntities = Entities.find().map(updateEntityWithDelta);
+
+    detectAndHandleCollisions(newEntities);
+
+    newEntities.forEach(function (newEntity) {
+
+        Entities.update(newEntity._id, newEntity);
 
     });
-
-    lastUpdated = now;
 
 }
 
@@ -45,7 +60,7 @@ function updateEntity(delta, oldEntity) {
         updateAnimatable(delta, newEntity, oldEntity);
     }
 
-    Entities.update(oldEntity._id, newEntity);
+    return newEntity;
 
 }
 
@@ -90,6 +105,16 @@ function updateMovable(delta, newEntity, oldEntity) {
 function updateAnimatable(delta, newEntity, oldEntity) {
 
     newEntity.animation = isMoving(newEntity) ? 'walk' : 'idle';
+
+}
+
+
+// =============================================================================
+// = Collision detection                                                       =
+// =============================================================================
+
+
+function detectAndHandleCollisions(entities) {
 
 }
 
