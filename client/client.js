@@ -67,14 +67,15 @@ function updateMyself(me) {
 
     if (mySprite)
     {
-        mySprite.rotation = game.physics.arcade.angleToPointer(mySprite);
         if (yInc != 0 || xInc != 0)
         {
-          mySprite.animations.play('walk', speed, true);
+            angleInRadians = (Math.atan2(yInc, xInc) - Math.atan2(1, 0));
+            mySprite.angle = angleInRadians * 180 / Math.PI;
+            mySprite.animations.play('walk', speed, true);
         }
         else
         {
-          mySprite.animations.play('idle', 1, true);
+            mySprite.animations.play('idle', 1, true);
         }
     }
 }
@@ -108,7 +109,6 @@ var cursors;
 
 function create() {
 
-    game.physics.startSystem(Phaser.Physics.ARCADE);
     createMyself();
 
     game.add.tileSprite(0, 0, 1920, 1920, 'background');
