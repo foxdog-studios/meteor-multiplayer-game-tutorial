@@ -105,6 +105,7 @@ function create() {
     cursors = game.input.keyboard.createCursorKeys();
 
     startTrackingEntities();
+
 }
 
 
