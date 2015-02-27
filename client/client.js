@@ -7,7 +7,7 @@ MY_ID = amplify.store('playerId') || amplify.store('playerId', Random.id());
 
 function createMyself() {
 
-    Players.upsert({
+    Entities.upsert({
 
         _id: MY_ID
 
@@ -32,6 +32,7 @@ function updateMyself(me) {
     var xInc = 0;
     var yInc = 0;
 
+    // Up or down
     if (cursors.up.isDown)
     {
         yInc -= speed;
@@ -41,6 +42,7 @@ function updateMyself(me) {
         yInc += speed;
     }
 
+    // Left or right
     if (cursors.left.isDown)
     {
         xInc -= speed;
@@ -50,7 +52,7 @@ function updateMyself(me) {
         xInc += speed;
     }
 
-    Players.update(me._id, {
+    Entities.update(me._id, {
 
         $inc: {
 
@@ -61,6 +63,7 @@ function updateMyself(me) {
         }
 
     });
+
 }
 
 
@@ -82,6 +85,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
 function preload() {
 
     game.load.image('background','debug-grid-1920x1920.png');
+
     game.load.image('player','phaser-dude.png');
 
 }
@@ -92,14 +96,13 @@ var cursors;
 
 function create() {
 
-    createMyself();
-
     game.add.tileSprite(0, 0, 1920, 1920, 'background');
 
     game.world.setBounds(0, 0, 1920, 1920);
 
     cursors = game.input.keyboard.createCursorKeys();
 
+    startTrackingEntities();
 }
 
 
@@ -107,65 +110,104 @@ function create() {
 
 function update() {
 
-    var me = Players.findOne(MY_ID);
-
-    if (me)
-    {
-        updateMyself(me);
-    }
-
-    players.forEach(updatePlayer);
+    _.each(entities, updateEntities);
 
 }
 
 
-function updatePlayer(player) {
+function updateEntities(entity) {
 
-    var sprite = playerSprites[player._id];
-
-    if (!sprite)
+    if (entity._id == MY_ID)
     {
-        sprite = game.add.sprite(0, 0, 'player');
-
-        playerSprites[player._id] = sprite;
-
-        if (player._id == MY_ID)
-        {
-            game.camera.follow(sprite);
-        }
+        updateMyself(entity);
     }
 
-    updatePlayerSprite(player, sprite);
+    entity.sprite.x = entity.x;
 
-}
-
-
-function updatePlayerSprite(player, sprite) {
-
-    sprite.x = player.x;
-
-    sprite.y = player.y;
-
+    entity.sprite.y = entity.y;
 }
 
 
 // =============================================================================
-// = Players                                                                   =
+// = Tracking                                                                  =
 // =============================================================================
 
-var players = [];
-var playerSprites = {};
+var entities = {};
 
 
-Meteor.startup(function () {
+function startTrackingEntities() {
 
-    Tracker.autorun(function () {
+    Tracker.autorun(ensureIExists);
 
-        players = Players.find().fetch();
+    Entities.find().observe({
+
+        added: onEntityAdded,
+
+        changed: onEntityChanged,
+
+        removed: onEntityRemoved
 
     });
 
-});
+}
+
+
+function ensureIExists() {
+
+    var me = Entities.findOne(MY_ID, {
+
+        fields: {
+
+            _id: 1
+        }
+
+    });
+
+    if (!me)
+    {
+        createMyself();
+    }
+
+}
+
+
+function onEntityAdded(newEntity) {
+
+    newEntity.sprite = game.add.sprite(0, 0, 'player');
+
+    if (newEntity._id == MY_ID)
+    {
+        game.camera.follow(newEntity.sprite);
+    }
+
+    entities[newEntity._id] = newEntity;
+
+}
+
+
+function onEntityChanged(newEntity, oldEntity) {
+
+    newEntity.sprite = entities[oldEntity._id].sprite;
+
+    entities[newEntity._id] = newEntity;
+
+}
+
+
+function onEntityRemoved(oldEntity) {
+
+    oldEntity = entities[oldEntity._id];
+
+    if (oldEntity._id == MY_ID)
+    {
+        game.camera.unfollow();
+    }
+
+    oldEntity.sprite.destroy(true /* destroyChildren */);
+
+    delete entities[oldEntity._id];
+
+}
 
 
 // vim: set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab:
