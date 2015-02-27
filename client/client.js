@@ -201,10 +201,8 @@ function onEntityAdded(newEntity) {
     var sprite = game.add.sprite(0, 0, 'player');
 
     sprite.animations.add('idle', [1]);
-
     sprite.animations.add('walk');
-
-    sprite.animations.play('idle', 1, true);
+    sprite.animations.play('idle', 1 /* frameRate */, true /* loop */);
 
     sprite.anchor.setTo(0.5, 0.5);
 
