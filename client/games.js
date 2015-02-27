@@ -20,6 +20,7 @@ function preload() {
 var players = [];
 var playerSprites = {};
 var cursors;
+var PLAYER_SPEED = 4;
 
 function create() {
 
@@ -39,20 +40,20 @@ function update() {
 
   if (cursors.up.isDown)
   {
-    yInc -= 1;
+    yInc -= PLAYER_SPEED;
   }
   else if (cursors.down.isDown)
   {
-    yInc += 1;
+    yInc += PLAYER_SPEED;
   }
 
   if (cursors.left.isDown)
   {
-    xInc -= 1;
+    xInc -= PLAYER_SPEED;
   }
   else if (cursors.right.isDown)
   {
-    xInc += 1;
+    xInc += PLAYER_SPEED;
   }
 
   Players.update(player._id, { $inc: { x: xInc, y: yInc }});
