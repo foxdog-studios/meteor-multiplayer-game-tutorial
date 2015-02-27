@@ -1,14 +1,15 @@
 var lastUpdated;
 
+var framesPerSecond = 15;
+
+var millisecondsPerFrame = 1000 / framesPerSecond;
+
+
 Meteor.startup(function () {
 
-    lastUpdated = Date.now() / 1000;
+    lastUpdated = Date.now();
 
-    var framesPerSecond = 15;
-
-    var millisecondsPerFrame = 1000 / framesPerSecond;
-
-    Meteor.setInterval(update, millisecondsPerFrame);
+    update();
 
 });
 
@@ -17,21 +18,24 @@ function update() {
 
     // = Update timestamps =================================================
 
-    var now = Date.now() / 1000;
+    var start = Date.now();
 
-    var delta = now - lastUpdated;
+    var delta = start - lastUpdated;
 
-    lastUpdated = now;
+    lastUpdated = start;
 
 
     // = Update Entities ===================================================
+
+
+    var deltaSeconds = delta / 1000;
 
     var entities = Entities.find().map(function (oldVersion) {
 
         return {
 
             oldVersion: oldVersion,
-            newVersion: updateEntity(delta, oldVersion)
+            newVersion: updateEntity(deltaSeconds, oldVersion)
 
         };
 
@@ -49,6 +53,12 @@ function update() {
         }
 
     });
+
+
+    // = Schedule ==========================================================
+
+    console.log(millisecondsPerFrame - Date.now() + start);
+    Meteor.setTimeout(update, millisecondsPerFrame - Date.now() + start);
 
 }
 
