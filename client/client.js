@@ -35,35 +35,57 @@ function updateMyself(me) {
     // Up or down
     if (cursors.up.isDown)
     {
-        yInc -= speed;
+        yInc -= 1;
     }
     else if (cursors.down.isDown)
     {
-        yInc += speed;
+        yInc += 1;
     }
 
     // Left or right
     if (cursors.left.isDown)
     {
-        xInc -= speed;
+        xInc -= 1;
     }
     else if (cursors.right.isDown)
     {
-        xInc += speed;
+        xInc += 1;
+    }
+
+    magnitudeOfMovement = Math.sqrt(
+            (xInc * xInc)
+        +
+            (yInc * yInc)
+    );
+
+    if (magnitudeOfMovement > 0)
+    {
+        xInc /= magnitudeOfMovement;
+        yInc /= magnitudeOfMovement;
     }
 
     Entities.update(me._id, {
 
         $inc: {
 
-            x: xInc,
+            x: xInc * speed,
 
-            y: yInc
+            y: yInc * speed
 
         }
 
     });
 
+    if (yInc != 0 || xInc != 0)
+    {
+        angleInRadians = (Math.atan2(yInc, xInc) - Math.atan2(1, 0));
+        me.sprite.angle = angleInRadians * 180 / Math.PI;
+        me.sprite.animations.play('walk', speed, true);
+    }
+    else
+    {
+        me.sprite.animations.play('idle', 1, true);
+    }
 }
 
 
@@ -86,7 +108,7 @@ function preload() {
 
     game.load.image('background','debug-grid-1920x1920.png');
 
-    game.load.image('player','phaser-dude.png');
+    game.load.spritesheet('player','player.png', 16, 16);
 
 }
 
@@ -104,6 +126,8 @@ function create() {
 
     startTrackingEntities();
 }
+
+
 
 
 // = Update ====================================================================
@@ -137,7 +161,7 @@ var entities = {};
 
 function startTrackingEntities() {
 
-    Tracker.autorun(ensureIExists);
+    Tracker.autorun(ensureIExist);
 
     Entities.find().observe({
 
@@ -152,13 +176,14 @@ function startTrackingEntities() {
 }
 
 
-function ensureIExists() {
+function ensureIExist() {
 
     var me = Entities.findOne(MY_ID, {
 
         fields: {
 
             _id: 1
+
         }
 
     });
@@ -173,7 +198,17 @@ function ensureIExists() {
 
 function onEntityAdded(newEntity) {
 
-    newEntity.sprite = game.add.sprite(0, 0, 'player');
+    var sprite = game.add.sprite(0, 0, 'player');
+
+    sprite.animations.add('idle', [1]);
+
+    sprite.animations.add('walk');
+
+    sprite.animations.play('idle', 1, true);
+
+    sprite.anchor.setTo(0.5, 0.5);
+
+    newEntity.sprite = sprite;
 
     if (newEntity._id == MY_ID)
     {
