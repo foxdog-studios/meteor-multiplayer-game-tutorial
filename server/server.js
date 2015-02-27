@@ -140,7 +140,7 @@ function detectAndHandleCollisions(entities) {
             var dy = e2.newVersion.y - e1.newVersion.y;
             var distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < 8)
+            if (distance < TILE_SIZE_PX)
             {
                 handleCollision(e1, e2);
             }
@@ -152,7 +152,35 @@ function detectAndHandleCollisions(entities) {
 
 function handleCollision(entity1, entity2) {
 
-    entity2.newVersion.x -= 10;
+    var shiftX;
+    var shiftY;
+    diffX = entity2.newVersion.x - entity1.newVersion.x;
+    if (diffX < 0) {
+        shiftX = -1;
+    }
+    else if (diffX > 0)
+    {
+        shiftX = 1;
+    }
+    else
+    {
+        shiftX = Math.random() < 0.5 ? 1 : -1;
+    }
+
+    diffY = entity2.newVersion.y - entity1.newVersion.y;
+    if (diffY < 0) {
+        shiftY = -1;
+    }
+    else if (diffY > 0)
+    {
+        shiftY = 1;
+    }
+    else
+    {
+        shiftY = Math.random() < 0.5 ? 1 : -1;
+    }
+    entity2.newVersion.x += shiftX * TILE_SIZE_PX;
+    entity2.newVersion.y -= shiftY * TILE_SIZE_PX;
 
 }
 

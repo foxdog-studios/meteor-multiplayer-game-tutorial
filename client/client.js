@@ -98,8 +98,8 @@ function shootBullet(entity) {
     Entities.insert({
 
         type: 'bullet',
-        x: entity.x + vectorX * 16,
-        y: entity.y + vectorY * 16,
+        x: entity.x + vectorX * TILE_SIZE_PX,
+        y: entity.y + vectorY * TILE_SIZE_PX,
         xDirection: vectorX,
         yDirection: vectorY,
         speed: 800,
@@ -159,8 +159,18 @@ function preload() {
     game.load.image('background', cacheBust('background.png'));
 
     game.load.spritesheet('bullet', cacheBust('bullet.png'), 8, 8);
-    game.load.spritesheet('player', cacheBust('player.png'), 16, 16);
-    game.load.spritesheet('monster', cacheBust('monster.png'), 16, 16);
+    game.load.spritesheet(
+        'player',
+        cacheBust('player.png'),
+        TILE_SIZE_PX,
+        TILE_SIZE_PX
+    );
+    game.load.spritesheet(
+        'monster',
+        cacheBust('monster.png'),
+        TILE_SIZE_PX,
+        TILE_SIZE_PX
+    );
 
 }
 
