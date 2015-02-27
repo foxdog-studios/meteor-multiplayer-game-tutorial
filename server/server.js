@@ -5,15 +5,13 @@ Meteor.startup(function () {
 
     lastUpdated = Date.now() / 1000;
 
-    var framesPerSecond = 15;
+    var framesPerSecond = 30;
 
     var millisecondsPerFrame = 1000 / framesPerSecond;
 
     Meteor.setInterval(update, millisecondsPerFrame);
 
 });
-
-
 
 
 function update() {
@@ -70,12 +68,14 @@ function updateMovable(delta, newEntity, oldEntity) {
         yNormalizedVelocity = yUnitVelocity / xyMagnitude;
     }
 
-    var speed = oldEntity.speed * delta
-
+    var speed = oldEntity.speed * delta;
     newEntity.xVelocity = speed * xNormalizedVelocity;
     newEntity.yVelocity = speed * yNormalizedVelocity;
-    newEntity.x += newEntity.xVelocity;
-    newEntity.y += newEntity.yVelocity;
+
+    var x = newEntity.x + newEntity.xVelocity;
+    var y = newEntity.y + newEntity.yVelocity;
+    newEntity.x = clamp(0, x, WORLD_WIDTH);
+    newEntity.y = clamp(0, y, WORLD_HEIGHT);
 
     if (isMoving(newEntity))
     {
@@ -97,6 +97,24 @@ function updateAnimatable(delta, newEntity, oldEntity) {
 // =============================================================================
 // = Utilities                                                                 =
 // =============================================================================
+
+function clamp(min, value, max) {
+
+    if (value < min)
+    {
+        return min;
+    }
+    else if (value > max)
+    {
+        return max;
+    }
+    else
+    {
+        return value;
+    }
+
+}
+
 
 function isMoving(entity) {
 
