@@ -67,8 +67,8 @@ function updateEntity(delta, oldEntity) {
 
 function updateMovable(delta, newEntity, oldEntity) {
 
-    var xUnitVelocity = xDirectionToUnitVelocity(oldEntity.xDirection);
-    var yUnitVelocity = yDirectionToUnitVelocity(oldEntity.yDirection);
+    var xUnitVelocity = oldEntity.xDirection;
+    var yUnitVelocity = oldEntity.yDirection;
 
     var xyMagnitude = Math.sqrt(
         (xUnitVelocity * xUnitVelocity) + (yUnitVelocity * yUnitVelocity)
@@ -147,44 +147,5 @@ function isMoving(entity) {
 
 }
 
-
-function xDirectionToUnitVelocity(xDirection) {
-
-    switch (xDirection)
-    {
-        case LEFT:
-            return -1;
-
-        case RIGHT:
-            return 1;
-
-        case null:
-            return 0;
-
-        default:
-            throw new Error('invalid xDirection: ' + xDirection);
-    }
-
-}
-
-
-function yDirectionToUnitVelocity(yDirection) {
-
-    switch (yDirection)
-    {
-        case UP:
-            return -1;
-
-        case DOWN:
-            return 1;
-
-        case null:
-            return 0;
-
-        default:
-            throw new Error('invalid yDirection: ' + yDirection);
-    }
-
-}
 
 // vim: set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab:
