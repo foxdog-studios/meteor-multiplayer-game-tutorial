@@ -267,6 +267,9 @@ function onEntityAdded(newEntity) {
 
     var sprite = game.add.sprite(0, 0, newEntity.type);
 
+    sprite.scale.set(2, 2);
+    sprite.texture.baseTexture.scaleMode = PIXI.scaleModes.NEAREST;
+
     switch (newEntity.type) {
         case 'player':
             sprite.animations.add('idle', [2]);
