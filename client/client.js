@@ -19,6 +19,10 @@ function createMyself() {
 
             y: 0,
 
+            xDirection: null,
+
+            yDirection: null,
+
             angle: 0,
 
             animation: 'idle'
@@ -32,71 +36,38 @@ function createMyself() {
 
 function updateMyself(me) {
 
-    var speed = 4;
-    var xInc = 0;
-    var yInc = 0;
-
-    // Up or down
-    if (cursors.up.isDown)
-    {
-        yInc -= 1;
-    }
-    else if (cursors.down.isDown)
-    {
-        yInc += 1;
-    }
+    var xDirection = null;
+    var yDirection = null;
 
     // Left or right
     if (cursors.left.isDown)
     {
-        xInc -= 1;
+        xDirection = LEFT;
     }
     else if (cursors.right.isDown)
     {
-        xInc += 1;
+        xDirection = RIGHT;
     }
 
-    magnitudeOfMovement = Math.sqrt(
-            (xInc * xInc)
-        +
-            (yInc * yInc)
-    );
-
-    if (magnitudeOfMovement > 0)
+    // Up or down
+    if (cursors.up.isDown)
     {
-        xInc /= magnitudeOfMovement;
-        yInc /= magnitudeOfMovement;
+        yDirection = UP;
     }
-
-    var update = {};
-
-
-    var $set = {};
-    if (yInc != 0 || xInc != 0)
+    else if (cursors.down.isDown)
     {
-        angleInRadians = (Math.atan2(yInc, xInc) - Math.atan2(1, 0));
-        playerAngleDegrees = angleInRadians * 180 / Math.PI;
-        $set.angle = playerAngleDegrees
-        animation = 'walk';
-    }
-    else
-    {
-        animation = 'idle';
-    }
-    $set.animation = animation;
-
-    update.$inc = {
-
-        x: xInc * speed,
-
-        y: yInc * speed
-
+        yDirection = DOWN;
     }
 
-    update.$set = $set;
+    Entities.update(MY_ID, {
 
-    Entities.update(me._id, update);
+        $set: {
 
+            xDirection: xDirection,
+            yDirection: yDirection
+        }
+
+    });
 }
 
 
@@ -158,13 +129,11 @@ function updateEntities(entity) {
     }
 
     entity.sprite.x = entity.x;
-
     entity.sprite.y = entity.y;
-
     entity.sprite.angle = entity.angle;
 
-    frameRate = 4;
-    loop = true;
+    var frameRate = 4;
+    var loop = true;
     entity.sprite.animations.play(entity.animation, frameRate, loop);
 
 }
@@ -219,7 +188,6 @@ function onEntityAdded(newEntity) {
 
     sprite.animations.add('idle', [1]);
     sprite.animations.add('walk');
-
     sprite.anchor.setTo(0.5, 0.5);
 
     newEntity.sprite = sprite;
