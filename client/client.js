@@ -1,14 +1,99 @@
-getPlayerId = function () {
-  var playerId = amplify.store('playerId');
-  if (!playerId) {
-    playerId = amplify.store('playerId', Random.id());
-  }
-  return playerId;
-};
+// =============================================================================
+// = Myself                                                                    =
+// =============================================================================
+
+MY_ID = amplify.store('playerId') || amplify.store('playerId', Random.id());
 
 
+var mySprite;
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update, render: render });
+
+function createMyself() {
+
+    Players.upsert({
+
+        _id: MY_ID
+
+    }, {
+
+        $set: {
+
+            x: 0,
+
+            y: 0
+
+        }
+
+    });
+
+}
+
+
+function updateMyself(me) {
+
+    var speed = 4;
+    var xInc = 0;
+    var yInc = 0;
+
+    if (cursors.up.isDown)
+    {
+        yInc -= speed;
+    }
+    else if (cursors.down.isDown)
+    {
+        yInc += speed;
+    }
+
+    if (cursors.left.isDown)
+    {
+        xInc -= speed;
+    }
+    else if (cursors.right.isDown)
+    {
+        xInc += speed;
+    }
+
+    Players.update(me._id, {
+
+        $inc: {
+
+            x: xInc,
+
+            y: yInc
+
+        }
+
+    });
+
+    if (mySprite)
+    {
+        mySprite.rotation = game.physics.arcade.angleToPointer(mySprite);
+        if (yInc != 0 || xInc != 0)
+        {
+          mySprite.animations.play('walk', speed, true);
+        }
+        else
+        {
+          mySprite.animations.play('idle', 1, true);
+        }
+    }
+}
+
+
+// =============================================================================
+// = Game                                                                      =
+// =============================================================================
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
+
+    preload: preload,
+
+    create: create,
+
+    update: update
+
+});
+
 
 function preload() {
 
@@ -17,16 +102,14 @@ function preload() {
 
 }
 
-var players = [];
-var playerSprites = {};
-var cursors;
-var PLAYER_SPEED = 4;
 
-var mySprite;
+var cursors;
+
 
 function create() {
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
+    createMyself();
 
     game.add.tileSprite(0, 0, 1920, 1920, 'background');
 
@@ -36,86 +119,80 @@ function create() {
 
 }
 
+
+// = Update ====================================================================
+
 function update() {
-  var player = Players.findOne(getPlayerId());
 
-  var xInc = 0;
-  var yInc = 0;
+    var me = Players.findOne(MY_ID);
 
-  if (cursors.up.isDown)
-  {
-    yInc -= PLAYER_SPEED;
-  }
-  else if (cursors.down.isDown)
-  {
-    yInc += PLAYER_SPEED;
-  }
+    if (me)
+    {
+        updateMyself(me);
+    }
 
-  if (cursors.left.isDown)
-  {
-    xInc -= PLAYER_SPEED;
-  }
-  else if (cursors.right.isDown)
-  {
-    xInc += PLAYER_SPEED;
-  }
+    players.forEach(updatePlayer);
 
-  Players.update(player._id, { $inc: { x: xInc, y: yInc }});
-
-  // TODO: Remove sprite when the player leaves.
-  players.forEach(function (player)
-  {
-      var sprite = playerSprites[player._id];
-
-      if (!sprite)
-      {
-          sprite = game.add.sprite(0, 0, 'player');
-
-          playerSprites[player._id] = sprite;
-
-          sprite.animations.add('idle', [1]);
-          sprite.animations.add('walk');
-          sprite.animations.play('walk', PLAYER_SPEED, true);
-          sprite.anchor.setTo(0.5, 0.5);
-
-          if (player._id == getPlayerId())
-          {
-              mySprite = sprite;
-              game.camera.follow(sprite);
-          }
-      }
-
-      sprite.x = player.x;
-
-      sprite.y = player.y;
-  });
-
-
-  mySprite.rotation = game.physics.arcade.angleToPointer(mySprite);
-
-  if (yInc != 0 || xInc != 0)
-  {
-    mySprite.angle =
-      (Math.atan2(yInc, xInc) - Math.atan2(1, 0)) * 180 / Math.PI;
-
-    mySprite.animations.play('walk', PLAYER_SPEED, true);
-  }
-  else
-  {
-    mySprite.animations.play('idle', 1, true);
-  }
 }
 
 
-function render() {}
+function updatePlayer(player) {
+
+    var sprite = playerSprites[player._id];
+
+    if (!sprite)
+    {
+        sprite = game.add.sprite(0, 0, 'player');
+
+        playerSprites[player._id] = sprite;
+
+        sprite.animations.add('idle', [1]);
+        sprite.animations.add('walk');
+        sprite.animations.play('idle', 1, true);
+
+        sprite.anchor.setTo(0.5, 0.5);
+
+        if (player._id == MY_ID)
+        {
+            mySprite = sprite;
+            game.camera.follow(sprite);
+        }
+    }
+
+    updatePlayerSprite(player, sprite);
+
+}
+
+
+function updatePlayerSprite(player, sprite) {
+
+    sprite.x = player.x;
+
+    sprite.y = player.y;
+
+}
+
+
+// =============================================================================
+// = Players                                                                   =
+// =============================================================================
+
+var players = [];
+var playerSprites = {};
+
 
 Meteor.startup(function () {
-  Players.upsert(
-    { _id: getPlayerId() },
-    { $set: { name: 'John', x: 0, y: 0 } }
-  );
 
-  Tracker.autorun(function () {
-    players = Players.find().fetch();
-  });
+    Tracker.autorun(fetchPlayers);
+
 });
+
+
+function fetchPlayers() {
+
+    players = Players.find().fetch();
+
+}
+
+
+// vim: set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab:
