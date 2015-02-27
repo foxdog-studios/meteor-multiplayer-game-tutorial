@@ -37,29 +37,41 @@ function updateMyself(me) {
 
     if (cursors.up.isDown)
     {
-        yInc -= speed;
+        yInc -= 1;
     }
     else if (cursors.down.isDown)
     {
-        yInc += speed;
+        yInc += 1;
     }
 
     if (cursors.left.isDown)
     {
-        xInc -= speed;
+        xInc -= 1;
     }
     else if (cursors.right.isDown)
     {
-        xInc += speed;
+        xInc += 1;
+    }
+
+    magnitudeOfMovement = Math.sqrt(
+            (xInc * xInc)
+        +
+            (yInc * yInc)
+    );
+
+    if (magnitudeOfMovement > 0)
+    {
+        xInc /= magnitudeOfMovement;
+        yInc /= magnitudeOfMovement;
     }
 
     Players.update(me._id, {
 
         $inc: {
 
-            x: xInc,
+            x: xInc * speed,
 
-            y: yInc
+            y: yInc * speed
 
         }
 
@@ -106,6 +118,19 @@ function preload() {
 
 var cursors;
 
+function gofull() {
+
+        if (game.scale.isFullScreen)
+                {
+                            game.scale.stopFullScreen();
+                                }
+            else
+                    {
+                                game.scale.startFullScreen();
+                                    }
+
+}
+
 
 function create() {
 
@@ -114,10 +139,14 @@ function create() {
     game.add.tileSprite(0, 0, 1920, 1920, 'background');
 
     game.world.setBounds(0, 0, 1920, 1920);
+      game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
+    game.input.onDown.add(gofull, this);
 
     cursors = game.input.keyboard.createCursorKeys();
 
 }
+
+
 
 
 // = Update ====================================================================
