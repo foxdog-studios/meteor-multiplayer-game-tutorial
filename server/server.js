@@ -156,12 +156,12 @@ function updateAi(delta, newEntity, oldEntity, oldEntities) {
 
 function detectAndHandleCollisions(entities) {
 
-    for (var i = 1; i < entities.length; i++) {
-
+    for (var i = 1; i < entities.length; i++)
+    {
         var e1 = entities[i];
 
-        for (var j = 0; j < i; j++) {
-
+        for (var j = 0; j < i; j++)
+        {
             var e2 = entities[j];
 
             if (e1.newVersion._id === e2.newVersion._id)
