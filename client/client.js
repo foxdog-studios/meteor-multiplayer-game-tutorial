@@ -73,22 +73,29 @@ function updateMyself(me) {
 // = Game                                                                      =
 // =============================================================================
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
+var game;
 
-    preload: preload,
 
-    create: create,
+Meteor.startup(function () {
 
-    update: update
+    game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
+
+        preload: preload,
+
+        create: create,
+
+        update: update
+
+    });
 
 });
 
 
 function preload() {
 
-    game.load.image('background', 'background.png');
+    game.load.image('background', cacheBust('background.png'));
 
-    game.load.spritesheet('player', 'player.png', 16, 16);
+    game.load.spritesheet('player', cacheBust('player.png'), 16, 16);
 
 }
 
@@ -109,18 +116,16 @@ function create() {
 }
 
 
-
-
 // = Update ====================================================================
 
 function update() {
 
-    _.each(entities, updateEntities);
+    _.each(entities, updateEntity);
 
 }
 
 
-function updateEntities(entity) {
+function updateEntity(entity) {
 
     if (entity._id == MY_ID)
     {
@@ -163,6 +168,7 @@ function startTrackingEntities() {
 
 
 function ensureIExist() {
+
     var me = Entities.findOne(MY_ID, {
 
         fields: {
@@ -222,6 +228,17 @@ function onEntityRemoved(oldEntity) {
     oldEntity.sprite.destroy(true /* destroyChildren */);
 
     delete entities[oldEntity._id];
+
+}
+
+
+// =============================================================================
+// = Utilities                                                                 =
+// =============================================================================
+
+function cacheBust(url) {
+
+    return url + '?' + Date.now();
 
 }
 
