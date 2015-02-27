@@ -13,7 +13,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, cr
 function preload() {
 
     game.load.image('background','debug-grid-1920x1920.png');
-    game.load.image('player','phaser-dude.png');
+    game.load.spritesheet('player','player.png', 16, 16);
 
 }
 
@@ -22,7 +22,11 @@ var playerSprites = {};
 var cursors;
 var PLAYER_SPEED = 4;
 
+var mySprite;
+
 function create() {
+
+    game.physics.startSystem(Phaser.Physics.ARCADE);
 
     game.add.tileSprite(0, 0, 1920, 1920, 'background');
 
@@ -69,8 +73,14 @@ function update() {
 
           playerSprites[player._id] = sprite;
 
+          sprite.animations.add('idle', [1]);
+          sprite.animations.add('walk');
+          sprite.animations.play('walk', PLAYER_SPEED, true);
+          sprite.anchor.setTo(0.5, 0.5);
+
           if (player._id == getPlayerId())
           {
+              mySprite = sprite;
               game.camera.follow(sprite);
           }
       }
@@ -79,6 +89,21 @@ function update() {
 
       sprite.y = player.y;
   });
+
+
+  mySprite.rotation = game.physics.arcade.angleToPointer(mySprite);
+
+  if (yInc != 0 || xInc != 0)
+  {
+    mySprite.angle =
+      (Math.atan2(yInc, xInc) - Math.atan2(1, 0)) * 180 / Math.PI;
+
+    mySprite.animations.play('walk', PLAYER_SPEED, true);
+  }
+  else
+  {
+    mySprite.animations.play('idle', 1, true);
+  }
 }
 
 
