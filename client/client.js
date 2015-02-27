@@ -174,6 +174,9 @@ function create() {
 
     game.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
+    // Don't pause the game when the window loses focus.
+    game.stage.disableVisibilityChange = true;
+
     cursors = game.input.keyboard.createCursorKeys();
 
     startTrackingEntities();
