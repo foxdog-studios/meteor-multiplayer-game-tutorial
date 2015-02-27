@@ -47,9 +47,8 @@ function update() {
 
     entities.forEach(function (entity) {
 
-        if (entity.newVersion.needsRemoving)
+        if (entity.newVersion.needsRemoving || entity.newVersion.health <= 0)
         {
-            console.log('removing');
             Entities.remove(entity.newVersion._id);
             return;
         }
@@ -228,14 +227,18 @@ function detectAndHandleCollisions(entities) {
 
 function handleCollision(entity1, entity2) {
 
-    if (entity1.newVersion.type == 'bullet')
+    entity1Type = entity1.newVersion.type;
+    entity2Type = entity2.newVersion.type;
+    if (entity1Type === 'bullet' && entity2Type !== 'bullet')
     {
         entity1.newVersion.needsRemoving = true;
+        entity2.newVersion.health -= 1;
         return;
     }
-    if (entity2.newVersion.type == 'bullet')
+    if (entity2Type === 'bullet' && entity1Type !== 'bullet')
     {
         entity2.newVersion.needsRemoving = true;
+        entity1.newVersion.health -= 1;
 
         return;
     }

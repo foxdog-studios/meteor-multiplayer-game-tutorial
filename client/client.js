@@ -5,6 +5,9 @@
 MY_ID = amplify.store('playerId') || amplify.store('playerId', Random.id());
 
 
+myLastShootTime = Date.now();
+
+
 function createMyself() {
 
     Entities.upsert({
@@ -23,6 +26,7 @@ function createMyself() {
             yDirection: 0,
             speed: 200,
             angle: 0,
+            health: 100,
 
             isAnimatable: true,
             animation: 'idle'
@@ -61,7 +65,12 @@ function updateMyself(me) {
     // Shoot
     if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
     {
-        shootBullet(me);
+        now = Date.now()
+        if (now - myLastShootTime > 100)
+        {
+            shootBullet(me);
+            myLastShootTime = now;
+        }
     }
 
     // Reset
@@ -103,6 +112,7 @@ function shootBullet(entity) {
         xDirection: vectorX,
         yDirection: vectorY,
         speed: 800,
+        health: 1,
         angle: entity.angle,
         isMovable: true,
         isAnimatable: true,
@@ -124,6 +134,7 @@ function createMonster(entity) {
         xDirection: 0,
         yDirection: 0,
         speed: 100,
+        health: 1,
         angle: entity.angle,
         isMovable: true,
         animation: 'walk',
@@ -247,10 +258,12 @@ function ensureIExist() {
 
     });
 
+
     if (!me)
     {
         createMyself();
     }
+
 
 }
 
