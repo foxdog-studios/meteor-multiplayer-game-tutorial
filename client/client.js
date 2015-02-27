@@ -5,12 +5,9 @@
 MY_ID = amplify.store('playerId') || amplify.store('playerId', Random.id());
 
 
-var mySprite;
-
-
 function createMyself() {
 
-    Players.upsert({
+    Entities.upsert({
 
         _id: MY_ID
 
@@ -39,6 +36,7 @@ function updateMyself(me) {
     var xInc = 0;
     var yInc = 0;
 
+    // Up or down
     if (cursors.up.isDown)
     {
         yInc -= 1;
@@ -48,6 +46,7 @@ function updateMyself(me) {
         yInc += 1;
     }
 
+    // Left or right
     if (cursors.left.isDown)
     {
         xInc -= 1;
@@ -71,22 +70,20 @@ function updateMyself(me) {
 
     var update = {};
 
-    if (mySprite)
+
+    var $set = {};
+    if (yInc != 0 || xInc != 0)
     {
-        var $set = {};
-        if (yInc != 0 || xInc != 0)
-        {
-            angleInRadians = (Math.atan2(yInc, xInc) - Math.atan2(1, 0));
-            playerAngleDegrees = angleInRadians * 180 / Math.PI;
-            $set.angle = playerAngleDegrees
-            animation = 'walk';
-        }
-        else
-        {
-            animation = 'idle';
-        }
-        $set.animation = animation;
+        angleInRadians = (Math.atan2(yInc, xInc) - Math.atan2(1, 0));
+        playerAngleDegrees = angleInRadians * 180 / Math.PI;
+        $set.angle = playerAngleDegrees
+        animation = 'walk';
     }
+    else
+    {
+        animation = 'idle';
+    }
+    $set.animation = animation;
 
     update.$inc = {
 
@@ -98,7 +95,7 @@ function updateMyself(me) {
 
     update.$set = $set;
 
-    Players.update(me._id, update);
+    Entities.update(me._id, update);
 
 }
 
@@ -121,6 +118,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
 function preload() {
 
     game.load.image('background','debug-grid-1920x1920.png');
+
     game.load.spritesheet('player','player.png', 16, 16);
 
 }
@@ -131,14 +129,13 @@ var cursors;
 
 function create() {
 
-    createMyself();
-
     game.add.tileSprite(0, 0, 1920, 1920, 'background');
 
     game.world.setBounds(0, 0, 1920, 1920);
 
     cursors = game.input.keyboard.createCursorKeys();
 
+    startTrackingEntities();
 }
 
 
@@ -148,75 +145,117 @@ function create() {
 
 function update() {
 
-    var me = Players.findOne(MY_ID);
-
-    if (me)
-    {
-        updateMyself(me);
-    }
-
-    players.forEach(updatePlayer);
+    _.each(entities, updateEntities);
 
 }
 
 
-function updatePlayer(player) {
+function updateEntities(entity) {
 
-    var sprite = playerSprites[player._id];
-
-    if (!sprite)
+    if (entity._id == MY_ID)
     {
-        sprite = game.add.sprite(0, 0, 'player');
-
-        playerSprites[player._id] = sprite;
-
-        sprite.animations.add('idle', [1]);
-        sprite.animations.add('walk');
-
-        sprite.anchor.setTo(0.5, 0.5);
-
-        if (player._id == MY_ID)
-        {
-            mySprite = sprite;
-            game.camera.follow(sprite);
-        }
+        updateMyself(entity);
     }
 
-    updatePlayerSprite(player, sprite);
+    entity.sprite.x = entity.x;
 
-}
+    entity.sprite.y = entity.y;
 
+    entity.sprite.angle = entity.angle;
 
-function updatePlayerSprite(player, sprite) {
-
-    sprite.x = player.x;
-
-    sprite.y = player.y;
-
-    sprite.angle = player.angle;
-
-    sprite.animations.play(player.animation, 4, true);
+    entity.sprite.animations.play(entity.animation, 4, true);
 
 }
 
 
 // =============================================================================
-// = Players                                                                   =
+// = Tracking                                                                  =
 // =============================================================================
 
-var players = [];
-var playerSprites = {};
+var entities = {};
 
 
-Meteor.startup(function () {
+function startTrackingEntities() {
 
-    Tracker.autorun(function () {
+    Tracker.autorun(ensureIExist);
 
-        players = Players.find().fetch();
+    Entities.find().observe({
+
+        added: onEntityAdded,
+
+        changed: onEntityChanged,
+
+        removed: onEntityRemoved
 
     });
 
-});
+}
+
+
+function ensureIExist() {
+    var me = Entities.findOne(MY_ID, {
+
+        fields: {
+
+            _id: 1
+
+        }
+
+    });
+
+    if (!me)
+    {
+        createMyself();
+    }
+
+}
+
+
+function onEntityAdded(newEntity) {
+
+    var sprite = game.add.sprite(0, 0, 'player');
+
+    sprite.animations.add('idle', [1]);
+
+    sprite.animations.add('walk');
+
+    sprite.anchor.setTo(0.5, 0.5);
+
+    newEntity.sprite = sprite;
+
+    if (newEntity._id == MY_ID)
+    {
+        game.camera.follow(newEntity.sprite);
+    }
+
+    entities[newEntity._id] = newEntity;
+
+}
+
+
+function onEntityChanged(newEntity, oldEntity) {
+
+    newEntity.sprite = entities[oldEntity._id].sprite;
+
+    entities[newEntity._id] = newEntity;
+
+}
+
+
+function onEntityRemoved(oldEntity) {
+
+    oldEntity = entities[oldEntity._id];
+
+    if (oldEntity._id == MY_ID)
+    {
+        game.camera.unfollow();
+    }
+
+    oldEntity.sprite.destroy(true /* destroyChildren */);
+
+    delete entities[oldEntity._id];
+
+}
 
 
 // vim: set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab:
