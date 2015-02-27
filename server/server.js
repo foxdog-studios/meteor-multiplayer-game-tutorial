@@ -5,7 +5,7 @@ Meteor.startup(function () {
 
     lastUpdated = Date.now() / 1000;
 
-    var framesPerSecond = 30;
+    var framesPerSecond = 15;
 
     var millisecondsPerFrame = 1000 / framesPerSecond;
 

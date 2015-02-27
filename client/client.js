@@ -15,6 +15,7 @@ function createMyself() {
 
         $set: {
 
+            type: 'player',
             isMovable: true,
             x: 0,
             y: 0,
@@ -57,6 +58,12 @@ function updateMyself(me) {
         yDirection = DOWN;
     }
 
+    // Shoot
+    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
+    {
+        shootBullet(me);
+    }
+
     Entities.update(MY_ID, {
 
         $set: {
@@ -64,6 +71,27 @@ function updateMyself(me) {
             xDirection: xDirection,
             yDirection: yDirection
         }
+
+    });
+}
+
+// =============================================================================
+// = Bullet                                                                    =
+// =============================================================================
+
+function shootBullet(entity) {
+    Entities.insert({
+
+        type: 'bullet',
+        x: entity.x,
+        y: entity.y,
+        xDirection: LEFT,
+        yDirection: UP,
+        speed: 400,
+        angle: entity.angle,
+        isMovable: true,
+        isAnimatable: true,
+        animation: 'idle'
 
     });
 }
@@ -89,6 +117,7 @@ function preload() {
     game.load.image('background', 'background.png');
 
     game.load.spritesheet('player', 'player.png', 16, 16);
+    game.load.spritesheet('bullet', 'bullet.png', 8, 8);
 
 }
 
@@ -183,10 +212,18 @@ function ensureIExist() {
 
 function onEntityAdded(newEntity) {
 
-    var sprite = game.add.sprite(0, 0, 'player');
+    var sprite = game.add.sprite(0, 0, newEntity.type);
 
-    sprite.animations.add('idle', [2]);
-    sprite.animations.add('walk', [0, 1]);
+    switch (newEntity.type) {
+        case 'player':
+            sprite.animations.add('idle', [2]);
+            sprite.animations.add('walk', [0, 1]);
+            break;
+        case 'bullet':
+            sprite.animations.add('idle', [0]);
+            break;
+    }
+
     sprite.anchor.setTo(0.5, 0.5);
 
     newEntity.sprite = sprite;
