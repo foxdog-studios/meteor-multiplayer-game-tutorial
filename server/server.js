@@ -2,6 +2,8 @@ var lastUpdated;
 
 
 Meteor.startup(function () {
+    Entities.remove({});
+
 
     lastUpdated = Date.now() / 1000;
 
@@ -27,19 +29,28 @@ function update() {
 
     // = Update Entities ===================================================
 
-    function updateEntityWithDelta(oldEntity) {
+    var entities = Entities.find().map(function (oldVersion) {
 
-        return updateEntity(delta, oldEntity);
+        return {
 
-    }
+            oldVersion: oldVersion,
+            newVersion: updateEntity(delta, oldVersion)
 
-    var newEntities = Entities.find().map(updateEntityWithDelta);
+        };
 
-    detectAndHandleCollisions(newEntities);
+    });
 
-    newEntities.forEach(function (newEntity) {
+    detectAndHandleCollisions(_.pluck(entities, 'newVersion'));
 
-        Entities.update(newEntity._id, newEntity);
+    entities.forEach(function (entity) {
+
+        var diff = difference(entity.newVersion, entity.oldVersion);
+
+        if (diff)
+        {
+            console.log(diff);
+            Entities.update(entity.newVersion._id, { $set: diff });
+        }
 
     });
 
@@ -84,15 +95,15 @@ function updateMovable(delta, newEntity, oldEntity) {
     }
 
     var speed = oldEntity.speed * delta;
-    newEntity.xVelocity = speed * xNormalizedVelocity;
-    newEntity.yVelocity = speed * yNormalizedVelocity;
+    var xVelocity = speed * xNormalizedVelocity;
+    var yVelocity = speed * yNormalizedVelocity;
 
-    var x = newEntity.x + newEntity.xVelocity;
-    var y = newEntity.y + newEntity.yVelocity;
+    var x = newEntity.x + xVelocity;
+    var y = newEntity.y + yVelocity;
     newEntity.x = clamp(0, x, WORLD_WIDTH);
     newEntity.y = clamp(0, y, WORLD_HEIGHT);
 
-    if (isMoving(newEntity))
+    if (xVelocity !== 0 || yVelocity !== 0)
     {
         var temp = Math.atan2(yUnitVelocity, xUnitVelocity);
         var angleInRadians  = temp - Math.atan2(1, 0);
@@ -136,6 +147,29 @@ function clamp(min, value, max) {
     else
     {
         return value;
+    }
+
+}
+
+
+function difference(newObject, oldObject) {
+
+    var foundDifference = false;
+    var difference = {};
+
+    _.each(newObject, function (value, name) {
+
+        if (value != oldObject[name])
+        {
+            foundDifference = true;
+            difference[name] = value;
+        }
+
+    });
+
+    if (foundDifference)
+    {
+        return difference;
     }
 
 }
