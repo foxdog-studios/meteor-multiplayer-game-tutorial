@@ -1,8 +1,8 @@
 // Directions
-DOWN = 'down';
-LEFT = 'left';
-RIGHT = 'right';
-UP = 'up';
+DOWN = 1;
+LEFT = -1;
+RIGHT = 1;
+UP = -1;
 
 
 WORLD_WIDTH = 1920;

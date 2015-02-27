@@ -19,8 +19,8 @@ function createMyself() {
             isMovable: true,
             x: 0,
             y: 0,
-            xDirection: null,
-            yDirection: null,
+            xDirection: 0,
+            yDirection: 0,
             speed: 200,
             angle: 0,
 
@@ -35,8 +35,8 @@ function createMyself() {
 
 function updateMyself(me) {
 
-    var xDirection = null;
-    var yDirection = null;
+    var xDirection = 0;
+    var yDirection = 0;
 
     // Left or right
     if (cursors.left.isDown)
@@ -80,13 +80,16 @@ function updateMyself(me) {
 // =============================================================================
 
 function shootBullet(entity) {
+    var offsetAngle = entity.angle + 90;
+    var vectorX = Math.cos(offsetAngle * Math.PI / 180);
+    var vectorY = Math.sin(offsetAngle * Math.PI / 180);
     Entities.insert({
 
         type: 'bullet',
         x: entity.x,
         y: entity.y,
-        xDirection: LEFT,
-        yDirection: UP,
+        xDirection: vectorX,
+        yDirection: vectorY,
         speed: 400,
         angle: entity.angle,
         isMovable: true,
