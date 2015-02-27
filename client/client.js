@@ -86,9 +86,9 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
 
 function preload() {
 
-    game.load.image('background','background.png');
+    game.load.image('background', 'background.png');
 
-    game.load.spritesheet('player','player.png', 16, 16);
+    game.load.spritesheet('player', 'player.png', 16, 16);
 
 }
 
