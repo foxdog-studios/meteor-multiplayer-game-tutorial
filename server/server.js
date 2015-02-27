@@ -1,9 +1,6 @@
 var lastUpdated;
 
-
 Meteor.startup(function () {
-    Entities.remove({});
-
 
     lastUpdated = Date.now() / 1000;
 
@@ -40,7 +37,7 @@ function update() {
 
     });
 
-    detectAndHandleCollisions(_.pluck(entities, 'newVersion'));
+    detectAndHandleCollisions(entities);
 
     entities.forEach(function (entity) {
 
@@ -48,7 +45,6 @@ function update() {
 
         if (diff)
         {
-            console.log(diff);
             Entities.update(entity.newVersion._id, { $set: diff });
         }
 
@@ -127,6 +123,37 @@ function updateAnimatable(delta, newEntity, oldEntity) {
 
 function detectAndHandleCollisions(entities) {
 
+    for (var i = 1; i < entities.length; i++) {
+
+        var e1 = entities[i];
+
+        for (var j = 0; j < i; j++) {
+
+            var e2 = entities[j];
+
+            if (e1.newVersion._id === e2.newVersion._id)
+            {
+                return;
+            }
+
+            var dx = e2.newVersion.x - e1.newVersion.x;
+            var dy = e2.newVersion.y - e1.newVersion.y;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 100)
+            {
+                handleCollision(e1, e2);
+            }
+        }
+    }
+
+}
+
+
+function handleCollision(entity1, entity2) {
+
+    entity2.newVersion.x -= 100;
+
 }
 
 
@@ -180,6 +207,17 @@ function isMoving(entity) {
     return entity.xVelocity != 0 || entity.yVelocity != 0;
 
 }
+
+
+Meteor.methods({
+
+    reset: function () {
+
+        Entities.remove({});
+
+    }
+
+});
 
 
 // vim: set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab:
