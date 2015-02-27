@@ -204,7 +204,7 @@ function difference(newObject, oldObject) {
 
 function isMoving(entity) {
 
-    return entity.xVelocity != 0 || entity.yVelocity != 0;
+    return entity.xDirection != 0 || entity.yDirection != 0;
 
 }
 
