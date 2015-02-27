@@ -86,8 +86,8 @@ function shootBullet(entity) {
     Entities.insert({
 
         type: 'bullet',
-        x: entity.x,
-        y: entity.y,
+        x: entity.x + vectorX * 16,
+        y: entity.y + vectorY * 16,
         xDirection: vectorX,
         yDirection: vectorY,
         speed: 400,

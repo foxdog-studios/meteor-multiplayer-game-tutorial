@@ -48,7 +48,7 @@ function update() {
 
         if (diff)
         {
-            console.log(diff);
+            //console.log(diff);
             Entities.update(entity.newVersion._id, { $set: diff });
         }
 
@@ -177,7 +177,7 @@ function difference(newObject, oldObject) {
 
 function isMoving(entity) {
 
-    return entity.xVelocity != 0 || entity.yVelocity != 0;
+    return entity.xDirection != 0 || entity.yDirection != 0;
 
 }
 
