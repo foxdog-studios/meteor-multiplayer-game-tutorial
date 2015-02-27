@@ -118,19 +118,6 @@ function preload() {
 
 var cursors;
 
-function gofull() {
-
-        if (game.scale.isFullScreen)
-                {
-                            game.scale.stopFullScreen();
-                                }
-            else
-                    {
-                                game.scale.startFullScreen();
-                                    }
-
-}
-
 
 function create() {
 
@@ -139,8 +126,6 @@ function create() {
     game.add.tileSprite(0, 0, 1920, 1920, 'background');
 
     game.world.setBounds(0, 0, 1920, 1920);
-      game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
-    game.input.onDown.add(gofull, this);
 
     cursors = game.input.keyboard.createCursorKeys();
 
