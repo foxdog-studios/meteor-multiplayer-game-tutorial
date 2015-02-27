@@ -127,24 +127,39 @@ function updateAi(delta, newEntity, oldEntity, oldEntities) {
         return;
     }
 
+    var distanceToClosestPlayerSoFar = Infinity;
+    var closestPlayer = null
+    var closestDx = Infinity;
+    var closestDy = Infinity;
+
+
     oldEntities.forEach(function(entity) {
+
         if (entity.type === 'player')
         {
             var dX = entity.x - newEntity.x;
             var dY = entity.y - newEntity.y;
             var distance = Math.sqrt(dX * dX + dY * dY);
-            if (distance === 0) {
-                return;
+            if (distance < distanceToClosestPlayerSoFar)
+            {
+                distanceToClosestPlayerSoFar = distance;
+                closestPlayer = entity;
+                closestDx = dX;
+                closestDy = dY;
             }
-            var normalisedDx = dX / distance;
-            var normalisedDy = dY / distance;
-            var temp = Math.atan2(normalisedDy, normalisedDx);
-            newEntity.angle = (temp - Math.atan2(1, 0)) * 180 / Math.PI;
-            newEntity.x += dX / distance * 2;
-            newEntity.y += dY / distance * 2;
-            return;
         }
+
     });
+
+    if (distanceToClosestPlayerSoFar === 0) {
+        return;
+    }
+    var normalisedDx = closestDx / distanceToClosestPlayerSoFar;
+    var normalisedDy = closestDy / distanceToClosestPlayerSoFar;
+    var temp = Math.atan2(normalisedDy, normalisedDx);
+    newEntity.angle = (temp - Math.atan2(1, 0)) * 180 / Math.PI;
+    newEntity.x += closestDx / distanceToClosestPlayerSoFar * 2;
+    newEntity.y += closestDy / distanceToClosestPlayerSoFar * 2;
 
 }
 
