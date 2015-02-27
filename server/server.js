@@ -5,7 +5,7 @@ Meteor.startup(function () {
 
     lastUpdated = Date.now() / 1000;
 
-    var framesPerSecond = 15;
+    var framesPerSecond = 30;
 
     var millisecondsPerFrame = 1000 / framesPerSecond;
 
@@ -58,6 +58,24 @@ function updateEntity(delta, entity) {
 
     var x = entity.x + xVelocity;
     var y = entity.y + yVelocity;
+
+    if (x < 0)
+    {
+        x = 0;
+    }
+    else if (x > WORLD_WIDTH)
+    {
+        x = WORLD_WIDTH;
+    }
+
+    if (y < 0)
+    {
+        y = 0;
+    }
+    else if (y > WORLD_HEIGHT)
+    {
+        y = WORLD_HEIGHT;
+    }
 
     var isMoving = xVelocity !== 0 || yVelocity !== 0;
 

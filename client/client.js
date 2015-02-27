@@ -88,7 +88,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
 
 function preload() {
 
-    game.load.image('background','debug-grid-1920x1920.png');
+    game.load.image('background','background.png');
 
     game.load.spritesheet('player','player.png', 16, 16);
 
@@ -100,9 +100,9 @@ var cursors;
 
 function create() {
 
-    game.add.tileSprite(0, 0, 1920, 1920, 'background');
+    game.add.tileSprite(0, 0, WORLD_WIDTH, WORLD_HEIGHT, 'background');
 
-    game.world.setBounds(0, 0, 1920, 1920);
+    game.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
     cursors = game.input.keyboard.createCursorKeys();
 
