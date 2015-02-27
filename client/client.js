@@ -15,18 +15,16 @@ function createMyself() {
 
         $set: {
 
+            isMovable: true,
             x: 0,
-
             y: 0,
-
             xDirection: null,
-
             yDirection: null,
-
+            speed: 200,
             angle: 0,
 
+            isAnimatable: true,
             animation: 'idle'
-
         }
 
     });

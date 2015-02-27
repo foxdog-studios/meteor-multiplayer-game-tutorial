@@ -33,10 +33,29 @@ function update() {
 }
 
 
-function updateEntity(delta, entity) {
+function updateEntity(delta, oldEntity) {
 
-    var xUnitVelocity = xDirectionToUnitVelocity(entity.xDirection);
-    var yUnitVelocity = yDirectionToUnitVelocity(entity.yDirection);
+    var newEntity = _.clone(oldEntity);
+
+    if (oldEntity.isMovable)
+    {
+        updateMovable(delta, newEntity, oldEntity);
+    }
+
+    if (oldEntity.isAnimatable)
+    {
+        updateAnimatable(delta, newEntity, oldEntity);
+    }
+
+    Entities.update(oldEntity._id, newEntity);
+
+}
+
+
+function updateMovable(delta, newEntity, oldEntity) {
+
+    var xUnitVelocity = xDirectionToUnitVelocity(oldEntity.xDirection);
+    var yUnitVelocity = yDirectionToUnitVelocity(oldEntity.yDirection);
 
     var xyMagnitude = Math.sqrt(
         (xUnitVelocity * xUnitVelocity) + (yUnitVelocity * yUnitVelocity)
@@ -51,49 +70,37 @@ function updateEntity(delta, entity) {
         yNormalizedVelocity = yUnitVelocity / xyMagnitude;
     }
 
-    var pixelsPerSecond = 200;
-    var speed = pixelsPerSecond * delta
-    var xVelocity = speed * xNormalizedVelocity;
-    var yVelocity = speed * yNormalizedVelocity;
+    var speed = oldEntity.speed * delta
 
-    var x = entity.x + xVelocity;
-    var y = entity.y + yVelocity;
+    newEntity.xVelocity = speed * xNormalizedVelocity;
+    newEntity.yVelocity = speed * yNormalizedVelocity;
+    newEntity.x += newEntity.xVelocity;
+    newEntity.y += newEntity.yVelocity;
 
-    var isMoving = xVelocity !== 0 || yVelocity !== 0;
-
-    var angle = entity.angle;
-
-    if (isMoving)
+    if (isMoving(newEntity))
     {
-        var angleInRadians = Math.atan2(yUnitVelocity, xUnitVelocity) -
-                Math.atan2(1, 0);
-
-        angle = angleInRadians * 180 / Math.PI;
+        var temp = Math.atan2(yUnitVelocity, xUnitVelocity);
+        var angleInRadians  = temp - Math.atan2(1, 0);
+        newEntity.angle = angleInRadians * 180 / Math.PI;
     }
 
-    var animation;
+}
 
-    if (isMoving)
-    {
-        animation = 'walk';
-    }
-    else
-    {
 
-        animation = 'idle';
-    }
+function updateAnimatable(delta, newEntity, oldEntity) {
 
-    Entities.update(entity._id, {
+    newEntity.animation = isMoving(newEntity) ? 'walk' : 'idle';
 
-        $set: {
+}
 
-            x: x,
-            y: y,
-            angle: angle,
-            animation: animation,
 
-        }
-    });
+// =============================================================================
+// = Utilities                                                                 =
+// =============================================================================
+
+function isMoving(entity) {
+
+    return entity.xVelocity != 0 || entity.yVelocity != 0;
 
 }
 

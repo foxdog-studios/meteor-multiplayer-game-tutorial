@@ -14,3 +14,25 @@ Setup
 
 5. Extract the ZIP archive into your Documents folder
 
+
+Entity traits
+-------------
+
+### Movable
+
+    entity.isMovable = true
+
+    // Required
+    entity.x: Number
+    entity.y: Number
+    entity.xDirection: {LEFT, RIGHT, null}
+    entity.yDirection: {UP, DOWN, null}
+    entity.speed: Number
+
+    // Set by server
+    entity.x: Number
+    entity.y: Number
+    entity.xVelocity: Number
+    entity.yVelocity: Number
+    entity.angle: Number
+
