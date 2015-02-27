@@ -127,7 +127,8 @@ function createMonster(entity) {
         angle: entity.angle,
         isMovable: true,
         isAnimatable: true,
-        animation: 'idle'
+        animation: 'idle',
+        isAi: true
 
     });
 }

@@ -26,15 +26,15 @@ function update() {
 
     // = Update Entities ===================================================
 
-    var entities = Entities.find().map(function (oldVersion) {
+    var oldEntities = Entities.find().fetch();
 
-        return {
+    var entities = [];
 
+    oldEntities.forEach(function (oldVersion) {
+        entities.push({
             oldVersion: oldVersion,
-            newVersion: updateEntity(delta, oldVersion)
-
-        };
-
+            newVersion: updateEntity(delta, oldVersion, oldEntities)
+        });
     });
 
     detectAndHandleCollisions(entities);
@@ -53,7 +53,7 @@ function update() {
 }
 
 
-function updateEntity(delta, oldEntity) {
+function updateEntity(delta, oldEntity, oldEntities) {
 
     var newEntity = _.clone(oldEntity);
 
@@ -65,6 +65,11 @@ function updateEntity(delta, oldEntity) {
     if (oldEntity.isAnimatable)
     {
         updateAnimatable(delta, newEntity, oldEntity);
+    }
+
+    if (oldEntity.isAi)
+    {
+        updateAi(delta, newEntity, oldEntity, oldEntities);
     }
 
     return newEntity;
@@ -112,6 +117,34 @@ function updateMovable(delta, newEntity, oldEntity) {
 function updateAnimatable(delta, newEntity, oldEntity) {
 
     newEntity.animation = isMoving(newEntity) ? 'walk' : 'idle';
+
+}
+
+
+function updateAi(delta, newEntity, oldEntity, oldEntities) {
+
+    if (newEntity.type !== 'monster') {
+        return;
+    }
+
+    oldEntities.forEach(function(entity) {
+        if (entity.type === 'player')
+        {
+            var dX = entity.x - newEntity.x;
+            var dY = entity.y - newEntity.y;
+            var distance = Math.sqrt(dX * dX + dY * dY);
+            if (distance === 0) {
+                return;
+            }
+            var normalisedDx = dX / distance;
+            var normalisedDy = dY / distance;
+            var temp = Math.atan2(normalisedDy, normalisedDx);
+            newEntity.angle = (temp - Math.atan2(1, 0)) * 180 / Math.PI;
+            newEntity.x += dX / distance * 2;
+            newEntity.y += dY / distance * 2;
+            return;
+        }
+    });
 
 }
 
@@ -179,8 +212,8 @@ function handleCollision(entity1, entity2) {
     {
         shiftY = Math.random() < 0.5 ? 1 : -1;
     }
-    entity2.newVersion.x += shiftX * TILE_SIZE_PX;
-    entity2.newVersion.y -= shiftY * TILE_SIZE_PX;
+    entity2.newVersion.x += shiftX * TILE_SIZE_PX / 4;
+    entity2.newVersion.y -= shiftY * TILE_SIZE_PX / 4;
 
 }
 
