@@ -163,7 +163,9 @@ function updateEntities(entity) {
 
     entity.sprite.angle = entity.angle;
 
-    entity.sprite.animations.play(entity.animation, 4, true);
+    frameRate = 4;
+    loop = true;
+    entity.sprite.animations.play(entity.animation, frameRate, loop);
 
 }
 
@@ -216,7 +218,6 @@ function onEntityAdded(newEntity) {
     var sprite = game.add.sprite(0, 0, 'player');
 
     sprite.animations.add('idle', [1]);
-
     sprite.animations.add('walk');
 
     sprite.anchor.setTo(0.5, 0.5);
