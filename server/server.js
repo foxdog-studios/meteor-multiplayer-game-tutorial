@@ -1,6 +1,6 @@
 var lastUpdated;
 
-var framesPerSecond = 30;
+var framesPerSecond = 10;
 
 var millisecondsPerFrame = 1000 / framesPerSecond;
 
