@@ -286,6 +286,7 @@ function onEntityAdded(newEntity) {
         case 'monster':
             sprite.animations.add('idle', [0]);
             sprite.animations.add('walk', [1, 2]);
+            sprite.animations.add('dead', [3, 4]);
             break;
     }
 
@@ -321,7 +322,18 @@ function onEntityRemoved(oldEntity) {
         game.camera.unfollow();
     }
 
-    oldEntity.sprite.destroy(true /* destroyChildren */);
+    switch (oldEntity.type) {
+        case 'bullet':
+            oldEntity.sprite.destroy(true /* destroyChildren */);
+            break;
+        case 'monster':
+            oldEntity.sprite.animations.play('dead', 1);
+            break;
+        case 'player':
+            oldEntity.sprite.destroy(true /* destroyChildren */);
+            break;
+    }
+
 
     delete entities[oldEntity._id];
 
