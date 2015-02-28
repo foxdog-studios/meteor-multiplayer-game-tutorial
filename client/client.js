@@ -39,8 +39,8 @@ function createMyself() {
 
 function updateMyself(me) {
 
-    var xDirection = 0;
-    var yDirection = 0;
+    var xDirection = STATIONARY;
+    var yDirection = STATIONARY;
 
     // Left or right
     if (cursors.left.isDown)
