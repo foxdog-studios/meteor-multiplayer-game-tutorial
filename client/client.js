@@ -101,6 +101,11 @@ function updateMyself(me) {
 // =============================================================================
 
 function shootBullet(entity) {
+    var myBullets = Entities.find({type: 'bullet', playerId: MY_ID});
+    if (myBullets.count() >= MAX_NUMBER_OF_BULLETS)
+    {
+        return;
+    }
     var offsetAngle = entity.angle + 90;
     var vectorX = Math.cos(offsetAngle * Math.PI / 180);
     var vectorY = Math.sin(offsetAngle * Math.PI / 180);
@@ -116,7 +121,8 @@ function shootBullet(entity) {
         angle: entity.angle,
         isMovable: true,
         isAnimatable: true,
-        animation: 'idle'
+        animation: 'idle',
+        playerId: MY_ID
 
     });
 }
@@ -126,6 +132,10 @@ function shootBullet(entity) {
 // =============================================================================
 
 function createMonster(entity) {
+    if (Entities.find({type: 'monster'}).count() >= MAX_NUMBER_OF_MONSTERS)
+    {
+        return;
+    }
     Entities.insert({
 
         type: 'monster',
